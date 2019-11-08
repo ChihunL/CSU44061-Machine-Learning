@@ -15,8 +15,16 @@ from math import sqrt, log, exp
 def get_unique_from_cols(dataset, columns):
     for column in columns:
         print(column)
+        print(dataset[column].dtype)
         print(dataset[column].unique())
         print(len(dataset[column].unique()))
+
+def parse_eur(data):
+    column = data['Yearly Income in addition to Salary (e.g. Rental Income)']
+    temp = [s.replace(' EUR' , '') for s in column]
+    data['Yearly Income in addition to Salary (e.g. Rental Income)'] = temp
+    return data
+
 
 
 # This function was ultimately not used in the best public submission of the code
@@ -60,8 +68,8 @@ test_dataset = pd.read_csv(
 
 # Removing Instance Col
 training_dataset = training_dataset.loc[:, [
-    'Instance','Year of Record','Housing Situation','Crime Level in the City of Employement','Work Experience in Current Job [years]','Satisfation with employer','Gender','Age','Country','Size of City','Profession','University Degree','Wears Glasses','Hair Color','Body Height [cm]','Yearly Income in addition to Salary (e.g. Rental Income)','Total Yearly Income [EUR]', ]]
-test_dataset = test_dataset.loc[:, ['Instance','Year of Record','Housing Situation','Crime Level in the City of Employement','Work Experience in Current Job [years]','Satisfation with employer','Gender','Age','Country','Size of City','Profession','University Degree','Wears Glasses','Hair Color','Body Height [cm]','Yearly Income in addition to Salary (e.g. Rental Income)','Total Yearly Income [EUR]', ]]
+    'Year of Record','Housing Situation','Crime Level in the City of Employement','Work Experience in Current Job [years]','Satisfation with employer','Gender','Age','Country','Size of City','Profession','University Degree','Wears Glasses','Hair Color','Body Height [cm]','Yearly Income in addition to Salary (e.g. Rental Income)','Total Yearly Income [EUR]', ]]
+test_dataset = test_dataset.loc[:, ['Year of Record','Housing Situation','Crime Level in the City of Employement','Work Experience in Current Job [years]','Satisfation with employer','Gender','Age','Country','Size of City','Profession','University Degree','Wears Glasses','Hair Color','Body Height [cm]','Yearly Income in addition to Salary (e.g. Rental Income)','Total Yearly Income [EUR]', ]]
 
 # I kept this code here commented as ultimately removed it but felt it was
 # smart to replace these values.
@@ -92,6 +100,22 @@ test_dataset = test_dataset.loc[:, ['Instance','Year of Record','Housing Situati
 
 # ******************************************************************************
 
+training_dataset=parse_eur(training_dataset)
+training_dataset['Yearly Income in addition to Salary (e.g. Rental Income)'] = pd.to_numeric(training_dataset['Yearly Income in addition to Salary (e.g. Rental Income)'], errors='coerce')
+training_dataset['Work Experience in Current Job [years]'] = pd.to_numeric(training_dataset['Work Experience in Current Job [years]'], errors='coerce')
+training_dataset = training_dataset.replace(np.nan, 0, regex=True)
+
+
+get_unique_from_cols(training_dataset, [
+    'Year of Record','Housing Situation','Crime Level in the City of Employement','Work Experience in Current Job [years]','Satisfation with employer','Gender','Age','Country','Size of City','Profession','University Degree','Wears Glasses','Hair Color','Body Height [cm]','Yearly Income in addition to Salary (e.g. Rental Income)' ])
+
+training_dataset= training_dataset[:201709]
+
+
+
+
+
+
 training_dataset = process_city(training_dataset)
 test_dataset = process_city(test_dataset)
 training_dataset = training_data_preprocessing(training_dataset)
@@ -103,6 +127,16 @@ training_dataset = training_data_preprocessing(training_dataset)
 # here.
 training_dataset = pd.get_dummies(training_dataset, drop_first=False)
 training_dataset.fillna(training_dataset.mean(), axis=0,inplace=True)
+
+
+
+
+test_dataset =test_dataset[:100000]
+
+test_dataset=parse_eur(test_dataset)
+test_dataset['Yearly Income in addition to Salary (e.g. Rental Income)'] = pd.to_numeric(test_dataset['Yearly Income in addition to Salary (e.g. Rental Income)'], errors='coerce')
+test_dataset['Work Experience in Current Job [years]'] = pd.to_numeric(test_dataset['Work Experience in Current Job [years]'], errors='coerce')
+test_dataset = test_dataset.replace(np.nan, 0, regex=True)
 
 test_dataset = pd.get_dummies(test_dataset,drop_first=False)
 test_dataset.fillna(test_dataset.mean(), axis=0,inplace=True)
